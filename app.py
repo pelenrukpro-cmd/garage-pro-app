@@ -1,9 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import numpy as np
 import pandas as pd
-import io
 from datetime import datetime
 import math
 
@@ -119,11 +117,11 @@ def calculate_structure(width, height, roof_pitch_deg, truss_spacing, snow_distr
     }
 
 # ============================================================================
-# 3D ВИЗУАЛИЗАЦИЯ (УЛУЧШЕННАЯ)
+# 3D ВИЗУАЛИЗАЦИЯ (КАК НА ВАШИХ ЧЕРТЕЖАХ)
 # ============================================================================
 
 def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing, calc):
-    """Профессиональная 3D модель с цветовой кодировкой и улучшенной видимостью"""
+    """Профессиональная 3D модель с цветовой кодировкой как на чертежах"""
     
     fig = go.Figure()
     
@@ -134,16 +132,16 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
     truss_height = calc['truss_height']
     roof_height = calc['roof_height']
     
-    # ЦВЕТОВАЯ СХЕМА (контрастная - видно на любом фоне):
+    # ЦВЕТОВАЯ СХЕМА (как на 3D рендере):
     colors = {
-        'columns': '#FF4444',        # красные - стойки/колонны
-        'trusses': '#00FF88',        # зелёные - фермы
-        'purlins': '#00D9FF',        # бирюзовые - прогоны
-        'bracing': '#FFAA00',        # оранжевые - связи
-        'nodes': '#FF00FF'           # фиолетовые - узлы
+        'columns': '#FFFFFF',        # белые - стойки/колонны
+        'trusses': '#27AE60',        # зелёные - фермы
+        'purlins': '#00CED1',        # бирюзовые - прогоны
+        'bracing': '#FF8C00',        # оранжевые - связи
+        'nodes': '#FF0000'           # красные - узлы
     }
     
-    # === 1. СТОЙКИ (КОЛОННЫ) - КРАСНЫЕ ===
+    # === 1. СТОЙКИ (КОЛОННЫ) - БЕЛЫЕ ===
     for i in range(num_trusses):
         x = i * truss_spacing
         
@@ -151,7 +149,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
         fig.add_trace(go.Scatter3d(
             x=[x, x], y=[0, 0], z=[0, height],
             mode='lines',
-            line=dict(color=colors['columns'], width=12),
+            line=dict(color=colors['columns'], width=10),
             name='Колонны' if i == 0 else '',
             showlegend=(i==0)
         ))
@@ -160,11 +158,11 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
         fig.add_trace(go.Scatter3d(
             x=[x, x], y=[width, width], z=[0, height],
             mode='lines',
-            line=dict(color=colors['columns'], width=12),
+            line=dict(color=colors['columns'], width=10),
             showlegend=False
         ))
     
-    # === 2. ФЕРМЫ - ЗЕЛЁНЫЕ (с правильной геометрией) ===
+    # === 2. ФЕРМЫ - ЗЕЛЁНЫЕ (с правильной геометрией как на чертеже ФМ1) ===
     for i in range(num_trusses):
         x = i * truss_spacing
         
@@ -172,7 +170,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
         fig.add_trace(go.Scatter3d(
             x=[x, x], y=[0, width], z=[height, height],
             mode='lines',
-            line=dict(color=colors['trusses'], width=10),
+            line=dict(color=colors['trusses'], width=8),
             name='Фермы (нижний пояс)' if i == 0 else '',
             showlegend=(i==0)
         ))
@@ -187,7 +185,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
             y=y_left,
             z=z_left,
             mode='lines',
-            line=dict(color=colors['trusses'], width=10),
+            line=dict(color=colors['trusses'], width=8),
             name='Фермы (верхний пояс)' if i == 0 else '',
             showlegend=(i==0)
         ))
@@ -201,7 +199,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
             y=y_right,
             z=z_right,
             mode='lines',
-            line=dict(color=colors['trusses'], width=10),
+            line=dict(color=colors['trusses'], width=8),
             showlegend=False
         ))
         
@@ -216,12 +214,12 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
             fig.add_trace(go.Scatter3d(
                 x=[x, x], y=[y_pos, y_pos], z=[height, z_top],
                 mode='lines',
-                line=dict(color=colors['trusses'], width=6),
+                line=dict(color=colors['trusses'], width=5),
                 name='Стойки фермы' if (i==0 and j==0) else '',
                 showlegend=(i==0 and j==0)
             ))
         
-        # === 4. ДИАГОНАЛЬНЫЕ РАСКОСЫ (перекрестия) ===
+        # === 4. ДИАГОНАЛЬНЫЕ РАСКОСЫ (как на чертеже) ===
         for j in range(num_panels):
             y1 = j * panel_length
             y2 = (j + 1) * panel_length
@@ -241,7 +239,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
                 fig.add_trace(go.Scatter3d(
                     x=[x, x], y=[y1, y2], z=[z1, height],
                     mode='lines',
-                    line=dict(color=colors['trusses'], width=5),
+                    line=dict(color=colors['trusses'], width=4),
                     name='Раскосы' if (i==0 and j==0) else '',
                     showlegend=(i==0 and j==0)
                 ))
@@ -249,7 +247,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
                 fig.add_trace(go.Scatter3d(
                     x=[x, x], y=[y1, y2], z=[height, z2],
                     mode='lines',
-                    line=dict(color=colors['trusses'], width=5),
+                    line=dict(color=colors['trusses'], width=4),
                     showlegend=False
                 ))
     
@@ -267,13 +265,15 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
         fig.add_trace(go.Scatter3d(
             x=[0, length], y=[y_pos, y_pos], z=[z_pos, z_pos],
             mode='lines',
-            line=dict(color=colors['purlins'], width=11),
+            line=dict(color=colors['purlins'], width=9),
             name='Прогоны' if j == 0 else '',
             showlegend=(j==0)
         ))
     
-    # === 6. СВЯЗИ ЖЁСТКОСТИ - ОРАНЖЕВЫЕ (кресты в торцах) ===
+    # === 6. СВЯЗИ ЖЁСТКОСТИ - ОРАНЖЕВЫЕ (кресты в торцах и по длине) ===
+    # Торцевые связи
     for x_pos in [0, length]:
+        # Крест в левой части
         fig.add_trace(go.Scatter3d(
             x=[x_pos, x_pos], y=[0, width/3], z=[height/2, height],
             mode='lines',
@@ -281,6 +281,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
             name='Связи' if x_pos == 0 else '',
             showlegend=(x_pos==0)
         ))
+        
         fig.add_trace(go.Scatter3d(
             x=[x_pos, x_pos], y=[width/3, 0], z=[height, height/2],
             mode='lines',
@@ -288,7 +289,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
             showlegend=False
         ))
     
-    # === 7. УЗЛЫ КРЕПЛЕНИЯ - ФИОЛЕТОВЫЕ ТОЧКИ ===
+    # === 7. УЗЛЫ КРЕПЛЕНИЯ - КРАСНЫЕ ТОЧКИ ===
     node_positions = []
     
     # Узлы на колоннах
@@ -352,7 +353,7 @@ def create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing,
         ),
         margin=dict(l=0, r=0, t=80, b=0),
         title=dict(
-            text="🏗️ 3D Модель каркаса (цветовая схема)",
+            text="🏗️ 3D Модель каркаса (цветовая схема как на чертежах)",
             x=0.5,
             font=dict(size=22, family="Arial Black")
         ),
@@ -477,12 +478,12 @@ st.markdown("---")
 # 3D модель
 st.subheader("🏗️ 3D Модель каркаса (цветовая схема)")
 st.info("""
-**Цветовая кодировка:**
-- 🔴 **Красный** - Колонны (стойки)
-- 🟢 **Зелёный** - Фермы (пояса, стойки, раскосы)
-- 🔵 **Бирюзовый** - Прогоны (горизонтальные балки)
+**Цветовая кодировка (как на ваших 3D рендерах):**
+- ⬜ **Белый** - Колонны (стойки)
+- 🟩 **Зелёный** - Фермы (пояса, стойки, раскосы)
+- 🔷 **Бирюзовый** - Прогоны (горизонтальные балки)
 - 🟠 **Оранжевый** - Связи жёсткости
-- 🟣 **Фиолетовый** - Узлы крепления
+- 🔴 **Красный** - Узлы крепления
 """)
 
 fig_3d = create_professional_3d(length, width, height, roof_pitch_deg, truss_spacing, calc)
@@ -528,7 +529,7 @@ st.warning("⚠️ **ВАЖНО:** Расчёт предварительный. 
 
 st.markdown(f"""
 <div style='text-align: center; color: gray; margin-top: 50px;'>
-<strong>🏗️ Garage Calculator PRO v5.1</strong><br>
+<strong>🏗️ Garage Calculator PRO v5.0</strong><br>
 {datetime.now().strftime('%d.%m.%Y %H:%M')} | {length}м × {width}м × {height}м
 </div>
 """, unsafe_allow_html=True)
